@@ -56,13 +56,12 @@ export default class Paragraphs extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        debugger;
         if (
             this.state.paragraphs.length === this.props.paragraphs.length &&
             this.state.paragraphs.length !== prevState.paragraphs.length
         ) {
             const restrictedHeight = this.calcRestrictedHeight(this.state.paragraphs);
-            debugger;
+
             this.setState({
                 height: restrictedHeight,
                 fullHeight: parseInt(window.getComputedStyle(this.wrapper).height, 10),
