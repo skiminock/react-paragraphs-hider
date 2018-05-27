@@ -6,11 +6,13 @@ class App extends Component {
     constructor(props) {
         super(props);
 
-        this.toggle = this.toggle.bind(this);
+        this.toggleNext = this.toggleNext.bind(this);
+        this.toggleColors = this.toggleColors.bind(this);
 
         this.state = {
             selected: 1,
-            paragraphs: this.paragraphs1
+            paragraphs: this.paragraphs1,
+            colors: false
         };
     }
 
@@ -58,7 +60,7 @@ class App extends Component {
         'То что завтра начнется война',
     ];
 
-    toggle() {
+    toggleNext() {
         let selected;
         if (this.state.selected === 6) {
             selected = 1;
@@ -71,11 +73,23 @@ class App extends Component {
         })
     }
 
+    toggleColors() {
+        this.setState({
+            colors: !this.state.colors
+        })
+    }
+
     render() {
+        const classNames = {
+            container: this.state.colors ? 'container container-colors' : 'container',
+            wrapper: this.state.colors ? 'wrapper wrapper-colors' : 'wrapper',
+            paragraph: this.state.colors ? 'paragraph paragraph-colors' : 'paragraph',
+        };
+
         return (
-            <div className="container">
+            <div className={classNames.container}>
                 <button
-                    onClick={this.toggle}
+                    onClick={this.toggleNext}
                     className="btn-next"
                 >
                     NEXT
@@ -85,13 +99,19 @@ class App extends Component {
                       paragraphs={this.state.paragraphs}
                       restrictedHeight={200}
                       lineHeight={24}
-                      wrapperClassName="wrapper"
-                      paragraphClassName="paragraph"
+                      wrapperClassName={classNames.wrapper}
+                      paragraphClassName={classNames.paragraph}
                       toggleClassName="toggle"
                       toggleShow={<button className="btn-show">SHOW</button>}
                       toggleHide={<button className="btn-hide">HIDE</button>}
                 />
 
+                <button
+                    className="btn-colors"
+                    onClick={this.toggleColors}
+                >
+                    TOGGLE COLORS
+                </button>
             </div>
         );
     }
