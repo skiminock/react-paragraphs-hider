@@ -1,4 +1,52 @@
+/*
+    app styles!
+ */
+
+button:active,
+button:focus,
+button {
+    background-image: none;
+    outline: 0;
+    box-shadow: none;
+    border: 1px solid grey;
+}
+.container {
+    display: flex;
+    flex-flow: column;
+}
+.btn-next {
+    background: orange;
+    color: white;
+}
+.btn-show {
+    background: green;
+    color: white;
+}
+.btn-hide {
+    background: black;
+    color: white;
+}
+
+/*
+    component styles!
+ */
+
+.wrapper {
+    display: flex;
+    flex-flow: column;
+    background: white;
+}
+.paragraphs {
+    margin-left: 10px;
+    margin-right: 10px;
+}
 .paragraph {
-  line-height: 24px;
-  margin-top: 40px;
+    line-height: 24px;
+    margin-top: 10px;
+}
+.toggle {
+    width: 100%;
+}
+.toggle > button {
+    width: 100%;
 }

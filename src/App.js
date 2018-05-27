@@ -73,10 +73,10 @@ class App extends Component {
 
     render() {
         return (
-            <div>
+            <div className="container">
                 <button
                     onClick={this.toggle}
-                    style={{ background: 'orange', color: 'white', width: '100%' }}
+                    className="btn-next"
                 >
                     NEXT
                 </button>
@@ -85,21 +85,12 @@ class App extends Component {
                       paragraphs={this.state.paragraphs}
                       restrictedHeight={200}
                       lineHeight={24}
+                      wrapperClassName="wrapper"
+                      paragraphsClassName="paragraphs"
                       paragraphClassName="paragraph"
-                      toggleShow={
-                          <button
-                              style={{ background: 'green', color: 'white', width: '100%' }}
-                          >
-                              SHOW
-                          </button>
-                      }
-                      toggleHide={
-                          <button
-                              style={{ background: 'black', color: 'white', width: '100%' }}
-                          >
-                              HIDE
-                          </button>
-                      }
+                      toggleClassName="toggle"
+                      toggleShow={<button className="btn-show">SHOW</button>}
+                      toggleHide={<button className="btn-hide">HIDE</button>}
                 />
 
             </div>
