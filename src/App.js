@@ -86,7 +86,6 @@ class App extends Component {
                       restrictedHeight={200}
                       lineHeight={24}
                       wrapperClassName="wrapper"
-                      paragraphsClassName="paragraphs"
                       paragraphClassName="paragraph"
                       toggleClassName="toggle"
                       toggleShow={<button className="btn-show">SHOW</button>}

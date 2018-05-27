@@ -192,7 +192,6 @@ export default class Paragraphs extends Component {
     render() {
         const {
             wrapperClassName,
-            paragraphsClassName,
             paragraphClassName,
             toggleClassName,
             toggleShow,
@@ -218,7 +217,6 @@ export default class Paragraphs extends Component {
                  style={{ visibility: (height ? 'visible' : 'hidden') }}
             >
                 <div
-                    className={paragraphsClassName}
                     style={paragraphsStyle}
                     ref={wrapper => this.wrapper = wrapper}
                 >
@@ -255,7 +253,6 @@ Paragraphs.propTypes = {
     toggleHide: PropTypes.node.isRequired,
 
     wrapperClassName: PropTypes.string,
-    paragraphsClassName: PropTypes.string,
     paragraphClassName: PropTypes.string,
     toggleClassName: PropTypes.string,
 
