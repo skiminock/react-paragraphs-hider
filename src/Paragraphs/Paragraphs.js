@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import Paragraph from '../Paragraph/Paragraph.js';
 
 export default class Paragraphs extends Component {
+    renderedParagraphs;
+    paragraphs;
     wrapper;
 
     constructor(props) {
