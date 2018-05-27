@@ -7,66 +7,59 @@ export default class Paragraphs extends Component {
     paragraphs;
     wrapper;
 
-    constructor(props) {
-        super(props);
-
-        this.toggle = this.toggle.bind(this);
-        this.onRenderParagraph = this.onRenderParagraph.bind(this);
-        this.calcRestrictedHeight = this.calcRestrictedHeight.bind(this);
-        this.calcParagraphHeight = this.calcParagraphHeight.bind(this);
-        this.makeId = this.makeId.bind(this);
-
+    init(flag, props) {
         this.renderedParagraphs = [];
+
         this.paragraphs =
-            (
-                this.props.paragraphs &&
-                this.props.paragraphs.map(p => {
-                    return {
-                        text: p,
-                        id: this.makeId()
-                    };
-                })
-            ) || [];
-        this.state = {
+            (props.paragraphs && props.paragraphs.map(p => ({ text: p, id: this.makeId() }))) || [];
+
+        const state = {
             paragraphs: [],
 
             height: null,
             fullHeight: null,
             restrictedHeight: null
         };
+
+        if (flag) {
+            this.state = state;
+        } else {
+            this.setState(state);
+        }
+    }
+
+    constructor(props) {
+        super(props);
+
+        this.toggle = this.toggle.bind(this);
+        this.onRenderParagraph = this.onRenderParagraph.bind(this);
+        this.calcTotalRestrictedHeight = this.calcTotalRestrictedHeight.bind(this);
+        this.calcParagraphRestrictedHeight = this.calcParagraphRestrictedHeight.bind(this);
+        this.calcHeightNearRestrictedHeight = this.calcHeightNearRestrictedHeight.bind(this);
+        this.makeId = this.makeId.bind(this);
+        this.init = this.init.bind(this);
+
+        this.init(true, this.props);
     }
 
     componentWillReceiveProps(nextProps) {
-        this.renderedParagraphs = [];
-        this.paragraphs =
-            (
-                nextProps.paragraphs &&
-                nextProps.paragraphs.map(p => {
-                    return {
-                        text: p,
-                        id: this.makeId()
-                    };
-                })
-            ) || [];
-        this.setState({
-            paragraphs: [],
-
-            height: null,
-            fullHeight: null,
-            restrictedHeight: null
-        });
+        this.init(false, nextProps);
     }
 
     componentDidUpdate(prevProps, prevState) {
+        const paragraphIds = this.state.paragraphs.map(p => p.id).sort();
+        const prevParagpraphIds = (prevState.paragraphs && prevState.paragraphs.map(p => p.id).sort()) || [];
+
         if (
-            this.state.paragraphs.length === this.props.paragraphs.length &&
-            this.state.paragraphs.length !== prevState.paragraphs.length
+            paragraphIds.length === this.props.paragraphs.length &&
+            paragraphIds.toString() !== prevParagpraphIds.toString()
         ) {
-            const restrictedHeight = this.calcRestrictedHeight(this.state.paragraphs);
+            const restrictedHeight = this.calcTotalRestrictedHeight(this.state.paragraphs);
+            const fullHeight = parseInt(window.getComputedStyle(this.wrapper).height, 10);
 
             this.setState({
                 height: restrictedHeight,
-                fullHeight: parseInt(window.getComputedStyle(this.wrapper).height, 10),
+                fullHeight,
                 restrictedHeight,
             });
         }
@@ -95,31 +88,33 @@ export default class Paragraphs extends Component {
         }
     }
 
-    calcRestrictedHeight(paragraphs) {
+    calcTotalRestrictedHeight(paragraphs) {
         const tmpParagraphs = paragraphs.sort((p1, p2) => {
             return p1.index > p2.index;
         });
 
         let newTotalHeight = 0;
-        for(let i = 0; i < tmpParagraphs.length; ++i) {
+
+        for (let i = 0; i < tmpParagraphs.length; ++i) {
             const tmpParagraph = tmpParagraphs[i];
-            const result = this.calcParagraphHeight(
+            const result = this.calcParagraphRestrictedHeight(
                 newTotalHeight,
                 tmpParagraph.styles
             );
             newTotalHeight = result.newTotalHeight;
             if (result.needBreak) break;
         }
+
         return newTotalHeight;
     }
 
-    calcParagraphHeight(totalHeight, styles) {
+    calcParagraphRestrictedHeight(totalHeight, styles) {
+        let result;
         let newTotalHeight = totalHeight;
 
-        const { restrictedHeight } = this.props;
+        const { restrictedHeight, lineHeight } = this.props;
         const {
             height,
-            lineHeight,
             marginTop,
             marginBottom,
             paddingTop,
@@ -127,72 +122,97 @@ export default class Paragraphs extends Component {
         } = styles;
 
         const parsedHeight = parseInt(height, 10);
-        const parsedLineHeight = parseInt(lineHeight, 10);
         const parsedMarginTop = parseInt(marginTop, 10);
         const parsedMarginBottom = parseInt(marginBottom, 10);
         const parsedPaddingTop = parseInt(paddingTop, 10);
         const parsedPaddingBottom = parseInt(paddingBottom, 10);
 
-        newTotalHeight += parsedMarginTop;
-        if (newTotalHeight >= restrictedHeight) {
-            return  { newTotalHeight, needBreak: true };
+        result = this.calcHeightNearRestrictedHeight(newTotalHeight, parsedMarginTop);
+        if (result.needBreak) {
+            return result;
+        } else {
+            newTotalHeight = result.newTotalHeight;
         }
 
-        newTotalHeight += parsedPaddingTop;
-        if (newTotalHeight >= restrictedHeight) {
-            return  { newTotalHeight, needBreak: true };
+        result = this.calcHeightNearRestrictedHeight(newTotalHeight, parsedPaddingTop);
+        if (result.needBreak) {
+            return result;
+        } else {
+            newTotalHeight = result.newTotalHeight;
         }
 
-        const lines = parsedHeight / parsedLineHeight;
+        const lines = parsedHeight / lineHeight;
 
-        let needBreak = false;
-        for(let i = 0; i < lines; ++i) {
-            newTotalHeight += parsedLineHeight;
-            if (newTotalHeight >= restrictedHeight) {
-                needBreak = true;
-                break;
+        for (let i = 0; i < lines; ++i) {
+            result = this.calcHeightNearRestrictedHeight(newTotalHeight, lineHeight);
+            if (result.needBreak) {
+                return result;
+            } else {
+                newTotalHeight = result.newTotalHeight;
             }
         }
-        if (needBreak) return  { newTotalHeight, needBreak: true };
 
-        newTotalHeight += parsedPaddingBottom;
-        if (newTotalHeight >= restrictedHeight) {
-            return  { newTotalHeight, needBreak: true };
+        result = this.calcHeightNearRestrictedHeight(newTotalHeight, parsedPaddingBottom);
+        if (result.needBreak) {
+            return result;
+        } else {
+            newTotalHeight = result.newTotalHeight;
         }
 
-        newTotalHeight += parsedMarginBottom;
-        if (newTotalHeight >= restrictedHeight) {
-            return  { newTotalHeight, needBreak: true };
+        result = this.calcHeightNearRestrictedHeight(newTotalHeight, parsedMarginBottom);
+        if (result.needBreak) {
+            return result;
+        } else {
+            newTotalHeight = result.newTotalHeight;
         }
 
-        return  { newTotalHeight, needBreak: false };
+        return { newTotalHeight, needBreak: false };
+    }
+
+    calcHeightNearRestrictedHeight(totalHeight, toAdd) {
+        const { restrictedHeight } = this.props;
+        const newTotalHeight = totalHeight + toAdd;
+
+        if (newTotalHeight >= restrictedHeight) {
+            const belowBorder = restrictedHeight - totalHeight;
+            const aboveBorder = newTotalHeight - restrictedHeight;
+
+            if (belowBorder < aboveBorder) {
+                return { newTotalHeight: totalHeight, needBreak: true };
+            }
+            return { newTotalHeight, needBreak: true };
+        }
+
+        return { newTotalHeight, needBreak: false };
     }
 
     makeId() {
         let text = '';
         const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-        for (let i = 0; i < 10; i++)
+        for (let i = 0; i < 10; ++i)
             text += possible.charAt(Math.floor(Math.random() * possible.length));
 
         return text;
     }
 
     render() {
-        const { paragraphClassName, toggleWrapperClassName, toggleShow, toggleHide } = this.props;
+        const { wrapperClassName, paragraphsClassName, paragraphClassName, toggleClassName, toggleShow, toggleHide } = this.props;
         const { height, fullHeight, restrictedHeight } = this.state;
 
         const innerStyle = {
             overflowY: 'hidden',
-            width: '100%',
         };
         if (height) {
             innerStyle.height = `${height}px`;
         }
 
         return (
-            <div style={{ width: '100%', visibility: height ? 'visible' : 'hidden' }}>
+            <div className={wrapperClassName}
+                 style={{ visibility: height ? 'visible' : 'hidden' }}
+            >
                 <div
+                    className={paragraphsClassName}
                     style={innerStyle}
                     ref={wrapper => this.wrapper = wrapper}
                 >
@@ -210,7 +230,10 @@ export default class Paragraphs extends Component {
                     }
                 </div>
                 {(fullHeight !== restrictedHeight) &&
-                    <div className={toggleWrapperClassName} onClick={this.toggle} style={{ width: '100%' }}>
+                    <div
+                        className={toggleClassName}
+                        onClick={this.toggle}
+                    >
                         {(height === fullHeight) ? toggleHide : toggleShow}
                     </div>
                 }
@@ -222,10 +245,13 @@ export default class Paragraphs extends Component {
 Paragraphs.propTypes = {
     paragraphs: PropTypes.arrayOf(PropTypes.string).isRequired,
     restrictedHeight: PropTypes.number.isRequired,
+    lineHeight: PropTypes.number.isRequired,
 
+    wrapperClassName: PropTypes.string,
+    paragraphsClassName: PropTypes.string,
     paragraphClassName: PropTypes.string,
+    toggleClassName: PropTypes.string,
 
-    toggleWrapperClassName: PropTypes.string,
     toggleShow: PropTypes.node.isRequired,
     toggleHide: PropTypes.node.isRequired,
 };
