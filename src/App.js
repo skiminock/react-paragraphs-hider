@@ -80,8 +80,8 @@ class App extends Component {
                 >
                     NEXT
                 </button>
-                {this.state.paragraphs &&
-                    <Paragraphs
+
+                <Paragraphs
                       paragraphs={this.state.paragraphs}
                       restrictedHeight={200}
                       lineHeight={24}
@@ -100,8 +100,8 @@ class App extends Component {
                               HIDE
                           </button>
                       }
-                    />
-                }
+                />
+
             </div>
         );
     }

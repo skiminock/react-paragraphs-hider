@@ -47,6 +47,7 @@ export default class Paragraphs extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
+        debugger;
         const paragraphIds = this.state.paragraphs.map(p => p.id).sort();
         const prevParagpraphIds = (prevState.paragraphs && prevState.paragraphs.map(p => p.id).sort()) || [];
 
@@ -112,7 +113,7 @@ export default class Paragraphs extends Component {
         let result;
         let newTotalHeight = totalHeight;
 
-        const { restrictedHeight, lineHeight } = this.props;
+        const { lineHeight } = this.props;
         const {
             height,
             marginTop,
@@ -197,14 +198,15 @@ export default class Paragraphs extends Component {
     }
 
     render() {
+        debugger;
         const { wrapperClassName, paragraphsClassName, paragraphClassName, toggleClassName, toggleShow, toggleHide } = this.props;
         const { height, fullHeight, restrictedHeight } = this.state;
 
-        const innerStyle = {
+        const paragraphsStyle = {
             overflowY: 'hidden',
         };
         if (height) {
-            innerStyle.height = `${height}px`;
+            paragraphsStyle.height = `${height}px`;
         }
 
         return (
@@ -213,7 +215,7 @@ export default class Paragraphs extends Component {
             >
                 <div
                     className={paragraphsClassName}
-                    style={innerStyle}
+                    style={paragraphsStyle}
                     ref={wrapper => this.wrapper = wrapper}
                 >
                     {
@@ -229,12 +231,12 @@ export default class Paragraphs extends Component {
                         )
                     }
                 </div>
-                {(fullHeight !== restrictedHeight) &&
+                {fullHeight !== restrictedHeight &&
                     <div
                         className={toggleClassName}
                         onClick={this.toggle}
                     >
-                        {(height === fullHeight) ? toggleHide : toggleShow}
+                        {height === fullHeight ? toggleHide : toggleShow}
                     </div>
                 }
             </div>

@@ -31,5 +31,6 @@ Paragraph.propTypes = {
     id: PropTypes.string.isRequired,
     text: PropTypes.string.isRequired,
     onRender: PropTypes.func.isRequired,
+
     className: PropTypes.string
 };
