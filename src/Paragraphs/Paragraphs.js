@@ -120,6 +120,9 @@ export default class Paragraphs extends Component {
         const parsedPaddingTop = parseInt(paddingTop, 10);
         const parsedPaddingBottom = parseInt(paddingBottom, 10);
 
+        const lines = parsedHeight / lineHeight;
+        if (lines === 0) return { realRestrictedHeight, needBreak: false };
+
         result = this.calcBelowOrAboveRestrictedHeight(realRestrictedHeight, parsedMarginTop);
         if (result.needBreak) {
             return result;
@@ -133,8 +136,6 @@ export default class Paragraphs extends Component {
         } else {
             realRestrictedHeight = result.realRestrictedHeight;
         }
-
-        const lines = parsedHeight / lineHeight;
 
         for (let i = 0; i < lines; ++i) {
             result = this.calcBelowOrAboveRestrictedHeight(realRestrictedHeight, lineHeight);
